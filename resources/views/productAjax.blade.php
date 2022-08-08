@@ -112,3 +112,29 @@
                         },
                     ]
                 });
+
+
+                // Click to Button
+
+                $('#createNewProduct').click(function() {
+                    $('#saveBtn').val("create-product");
+                    $('#product_id').val('');
+                    $('#productForm').trigger("reset");
+                    $('#modelHeading').html("Create New Product");
+                    $('#ajaxModel').modal('show');
+                });
+
+                // Click to Edit Button
+
+                $('body').on('click', '.editProduct', function() {
+                    var product_id = $(this).data('id');
+                    $.get("{{ route('products-ajax-crud.index') }}" + '/' + product_id + '/edit', function(
+                    data) {
+                        $('#modelHeading').html("Edit Product");
+                        $('#saveBtn').val("edit-user");
+                        $('#ajaxModel').modal('show');
+                        $('#product_id').val(data.id);
+                        $('#name').val(data.name);
+                        $('#detail').val(data.detail);
+                    })
+                });
