@@ -72,69 +72,118 @@
 <script type="text/javascript">
     $(function() {
 
-                /*------------------------------------------
-                 --------------------------------------------
-                 Pass Header Token
-                 --------------------------------------------
-                 --------------------------------------------*/
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
+        /*------------------------------------------
+         --------------------------------------------
+         Pass Header Token
+         --------------------------------------------
+         --------------------------------------------*/
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
-                /*------------------------------------------
-                --------------------------------------------
-                Render DataTable
-                --------------------------------------------
-                --------------------------------------------*/
-                var table = $('.data-table').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    ajax: "{{ route('products-ajax-crud.index') }}",
-                    columns: [{
-                            data: 'DT_RowIndex',
-                            name: 'DT_RowIndex'
-                        },
-                        {
-                            data: 'name',
-                            name: 'name'
-                        },
-                        {
-                            data: 'detail',
-                            name: 'detail'
-                        },
-                        {
-                            data: 'action',
-                            name: 'action',
-                            orderable: false,
-                            searchable: false
-                        },
-                    ]
-                });
+        /*------------------------------------------
+        --------------------------------------------
+        Render DataTable
+        --------------------------------------------
+        --------------------------------------------*/
+        var table = $('.data-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('products-ajax-crud.index') }}",
+            columns: [{
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'detail',
+                    name: 'detail'
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false
+                },
+            ]
+        });
 
 
-                // Click to Button
+        // Click to Button
 
-                $('#createNewProduct').click(function() {
-                    $('#saveBtn').val("create-product");
-                    $('#product_id').val('');
+        $('#createNewProduct').click(function() {
+            $('#saveBtn').val("create-product");
+            $('#product_id').val('');
+            $('#productForm').trigger("reset");
+            $('#modelHeading').html("Create New Product");
+            $('#ajaxModel').modal('show');
+        });
+
+        // Click to Edit Button
+
+        $('body').on('click', '.editProduct', function() {
+            var product_id = $(this).data('id');
+            $.get("{{ route('products-ajax-crud.index') }}" + '/' + product_id + '/edit', function(
+                data) {
+                $('#modelHeading').html("Edit Product");
+                $('#saveBtn').val("edit-user");
+                $('#ajaxModel').modal('show');
+                $('#product_id').val(data.id);
+                $('#name').val(data.name);
+                $('#detail').val(data.detail);
+            })
+        });
+
+        //  Create Product Code
+
+        $('#saveBtn').click(function(e) {
+            e.preventDefault();
+            $(this).html('Sending..');
+
+            $.ajax({
+                data: $('#productForm').serialize(),
+                url: "{{ route('products-ajax-crud.store') }}",
+                type: "POST",
+                dataType: 'json',
+                success: function(data) {
+
                     $('#productForm').trigger("reset");
-                    $('#modelHeading').html("Create New Product");
-                    $('#ajaxModel').modal('show');
-                });
+                    $('#ajaxModel').modal('hide');
+                    table.draw();
 
-                // Click to Edit Button
+                },
+                error: function(data) {
+                    console.log('Error:', data);
+                    $('#saveBtn').html('Save Changes');
+                }
+            });
+        });
 
-                $('body').on('click', '.editProduct', function() {
-                    var product_id = $(this).data('id');
-                    $.get("{{ route('products-ajax-crud.index') }}" + '/' + product_id + '/edit', function(
-                    data) {
-                        $('#modelHeading').html("Edit Product");
-                        $('#saveBtn').val("edit-user");
-                        $('#ajaxModel').modal('show');
-                        $('#product_id').val(data.id);
-                        $('#name').val(data.name);
-                        $('#detail').val(data.detail);
-                    })
-                });
+        // Delete Product Code
+
+        $('body').on('click', '.deleteProduct', function() {
+
+            var product_id = $(this).data("id");
+            confirm("Are You sure want to delete !");
+
+            $.ajax({
+                type: "DELETE",
+                url: "{{ route('products-ajax-crud.store') }}" + '/' + product_id,
+                success: function(data) {
+                    table.draw();
+                },
+                error: function(data) {
+                    console.log('Error:', data);
+                }
+            });
+        });
+
+    });
+</script>
+
+</html>
